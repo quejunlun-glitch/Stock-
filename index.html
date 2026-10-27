@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>混合多智能體量化交易系統 v4.5</title>
+    <title>混合多智能體量化交易系統 v4.5 (偵錯版)</title>
     <!-- Tailwind CSS & Chart.js -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -22,7 +22,7 @@
                     🚀
                 </div>
                 <h2 class="text-2xl font-bold tracking-tight text-white">量化交易系統 v4.5</h2>
-                <p class="text-slate-400 text-sm mt-1">請輸入你的 Gemini API Key 以啟動雙腦智能體</p>
+                <p class="text-slate-400 text-sm mt-1">請輸入你的 Gemini API Key 以啟動系統</p>
             </div>
             
             <div class="space-y-4">
@@ -32,11 +32,16 @@
                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-500 transition-colors">
                 </div>
 
-                <div class="text-xs text-slate-400 bg-slate-950/50 p-3 rounded-xl border border-slate-800/60">
-                    🔒 <span class="text-slate-300 font-medium">高度安全聲明：</span> 金鑰僅會暫存于當前瀏覽器的記憶體中，絕不會寫入任何 Cookie、LocalStorage 或傳送到外部伺服器。
+                <!-- 登入錯誤紅字提示區 -->
+                <div id="loginErrorAlert" class="hidden bg-rose-500/10 border border-rose-500/30 rounded-xl p-3 text-rose-400 text-xs font-medium space-y-1">
+                    <span id="loginErrorText">發生錯誤</span>
                 </div>
 
-                <button onclick="handleLogin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl transition-colors shadow-lg shadow-emerald-600/20">
+                <div class="text-xs text-slate-400 bg-slate-950/50 p-3 rounded-xl border border-slate-800/60">
+                    🔒 <span class="text-slate-300 font-medium">高度安全聲明：</span> 金鑰僅暫存於當前瀏覽器分頁記憶體中，絕不寫入 Cookie 或傳送至外部。
+                </div>
+
+                <button onclick="handleLogin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl transition-colors shadow-lg shadow-emerald-600/20 cursor-pointer">
                     解鎖並進入系統
                 </button>
 
@@ -51,23 +56,21 @@
 
     <!-- ================= 2. 主應用程式介面 ================= -->
     <div id="appContainer" class="hidden flex-1 flex flex-col">
-        <!-- 頂部導覽列 -->
         <header class="bg-slate-900/80 border-b border-slate-800 backdrop-blur sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <span class="text-2xl">🚀</span>
                 <div>
                     <h1 class="text-lg font-bold text-white tracking-tight">混合多智能體量化交易系統 <span class="text-emerald-400 text-xs px-2 py-0.5 bg-emerald-500/10 rounded-full border border-emerald-500/20">v4.5 Ultimate</span></h1>
-                    <p class="text-xs text-slate-400">Multi-Agent Quantitative Engine with Dynamic Search & Confidence Corridor</p>
+                    <p class="text-xs text-slate-400">Multi-Agent Quantitative Engine with Dynamic Search</p>
                 </div>
             </div>
             <div class="flex items-center space-x-4">
-                <button onclick="logout()" class="text-xs text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg transition-colors">
+                <button onclick="logout()" class="text-xs text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg transition-colors cursor-pointer">
                     清除金鑰並登出
                 </button>
             </div>
         </header>
 
-        <!-- 內容主體 -->
         <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
             <!-- 參數控制面板 -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
@@ -80,10 +83,19 @@
                     <input type="text" id="endDateInput" value="2026-10-19" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500">
                 </div>
                 <div>
-                    <button onclick="runAnalysis()" id="runBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl transition-colors shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2">
+                    <button onclick="runAnalysis()" id="runBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl transition-colors shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2 cursor-pointer">
                         <span>⚡ 執行雙腦智能體分析</span>
                     </button>
                 </div>
+            </div>
+
+            <!-- 執行中錯誤紅字提示區 -->
+            <div id="runtimeErrorBox" class="hidden bg-rose-500/10 border border-rose-500/30 rounded-2xl p-4 text-rose-400 text-sm space-y-1">
+                <div class="font-bold flex items-center gap-2">
+                    <span>❌ 系統執行異常警告：</span>
+                    <span id="runtimeErrorTitle">未知錯誤</span>
+                </div>
+                <p id="runtimeErrorDesc" class="text-xs text-rose-300/80 font-mono"></p>
             </div>
 
             <!-- 分析執行狀態與日誌 -->
@@ -99,9 +111,7 @@
 
             <!-- 輸出結果儀表板 -->
             <div id="resultDashboard" class="hidden space-y-6">
-                <!-- 網格報告區 -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- 三方博弈報告 -->
                     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl lg:col-span-2 space-y-4">
                         <h3 class="text-base font-bold text-white flex items-center space-x-2">
                             <span>👥</span><span>三方角色博弈性格分析報告</span>
@@ -130,16 +140,12 @@
                                 <div id="keywordsDisplay" class="text-xs font-mono text-emerald-400 mt-0.5">--</div>
                             </div>
                         </div>
-                        <!-- 新聞來源連結區 -->
                         <div>
                             <span class="text-xs font-semibold text-slate-400 block mb-2">🔗 聯結即時新聞來源與溯源</span>
-                            <div id="newsLinksContainer" class="space-y-1.5 text-xs">
-                                <!-- 動態填入連結 -->
-                            </div>
+                            <div id="newsLinksContainer" class="space-y-1.5 text-xs"></div>
                         </div>
                     </div>
 
-                    <!-- 多重時間框架勝率總結 -->
                     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4 flex flex-col justify-between">
                         <div>
                             <h3 class="text-base font-bold text-white mb-4 flex items-center space-x-2">
@@ -166,7 +172,6 @@
                     </div>
                 </div>
 
-                <!-- 視覺化圖表區 -->
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
                     <h3 class="text-base font-bold text-white flex items-center space-x-2">
                         <span>📊</span><span>多維預測軌跡與信賴誤差區間 (Confidence Band)</span>
@@ -179,17 +184,39 @@
         </main>
     </div>
 
-    <!-- ================= 3. 核心邏輯與 API 互動腳本 ================= -->
+    <!-- ================= 3. 核心邏輯與詳細錯誤捕捉腳本 ================= -->
     <script>
         let globalApiKey = "";
+
+        function showLoginError(msg) {
+            const alertBox = document.getElementById('loginErrorAlert');
+            const textEl = document.getElementById('loginErrorText');
+            textEl.textContent = msg;
+            alertBox.classList.remove('hidden');
+        }
+
+        function showRuntimeError(title, desc) {
+            const box = document.getElementById('runtimeErrorBox');
+            document.getElementById('runtimeErrorTitle').textContent = title;
+            document.getElementById('runtimeErrorDesc').textContent = desc;
+            box.classList.remove('hidden');
+        }
+
+        function hideRuntimeError() {
+            document.getElementById('runtimeErrorBox').classList.add('hidden');
+        }
 
         function handleLogin() {
             const key = document.getElementById('apiKeyInput').value.trim();
             if (!key) {
-                alert('請先輸入 Gemini API Key！');
+                showLoginError("⚠️ 錯誤原因：尚未輸入任何 API Key，請至 Google AI Studio 複製金鑰後貼入。");
                 return;
             }
-            // 移除任何舊格式限制，完美支援 AQ. 與 AIza 等所有 Google API Key 格式
+            if (key.length < 20) {
+                showLoginError("⚠️ 錯誤原因：輸入的金鑰長度過短，可能複製不完整（正確金鑰通常以 AQ. 或 AIza 開頭且較長）。");
+                return;
+            }
+            
             globalApiKey = key;
             document.getElementById('authModal').classList.add('hidden');
             document.getElementById('appContainer').classList.remove('hidden');
@@ -198,12 +225,14 @@
         function logout() {
             globalApiKey = "";
             document.getElementById('apiKeyInput').value = "";
+            document.getElementById('loginErrorAlert').classList.add('hidden');
             document.getElementById('appContainer').classList.add('hidden');
             document.getElementById('authModal').classList.remove('hidden');
         }
 
         function logMessage(msg) {
             const container = document.getElementById('logContainer');
+            if(!container) return;
             const p = document.createElement('div');
             p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
             container.appendChild(p);
@@ -225,452 +254,29 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-                    if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
-                    const data = await res.json();
-                    const textResult = data.candidates[0].content.parts[0].text;
-                    return JSON.parse(textResult);
-                } catch (err) {
-                    logMessage(`⚠️ 連線遭遇阻礙 (${err.message})，等待 3 秒後重試...`);
-                    await new Promise(r => setTimeout(r, 3000));
-                }
-            }
-            throw new Error("Gemini API 連線超過最大重試次數");
-        }
 
-        async function runAnalysis() {
-            const ticker = document.getElementById('tickerInput').value.trim();
-            const endDateStr = document.getElementById('endDateInput').value.trim();
-            
-            document.getElementById('statusBox').classList.remove('hidden');
-            document.getElementById('resultDashboard').classList.add('hidden');
-            document.getElementById('logContainer').innerHTML = '';
-
-            logMessage(`🎯 系統鎖定標的: ${ticker}，基準日: ${endDateStr}`);
-
-            try {
-                // 1. 模擬宏觀與新聞管線 (瀏覽器端透過公開 RSS 抓取)
-                logMessage("📰 正在透過動態關鍵詞抓取 Google News 即時資訊...");
-                const stockName = ticker.split('.')[0];
-                
-                // 模擬雙腦智能體情報官萃取關鍵詞
-                logMessage(`🕵️‍♂️ 大腦 1 號正在解析影響 ${stockName} 的核心驅動因子...`);
-                let keywords = [stockName, "AI", "半導體", "法說會"];
-                try {
-                    const kwRes = await callGemini(`列出影響股票「${stockName}」的三個核心關鍵詞。輸出嚴格 JSON: {"keywords": ["詞1", "詞2", "詞3"]}`);
-                    if (kwRes && kwRes.keywords) keywords = kwRes.keywords;
-                } catch(e) { logMessage("⚠️ 關鍵詞動態萃取走備用通道。"); }
-
-                document.getElementById('keywordsDisplay').textContent = keywords.join(', ');
-
-                // 抓取新聞 RSS (使用通用 CORS proxy)
-                const query = encodeURIComponent(`${stockName} AND (${keywords.join(' OR ')})`);
-                const rssUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://news.google.com/rss/search?q=${query}&hl=zh-TW&gl=TW&ceid=TW:zh-Hant`)}`;
-                
-                let newsText = "";
-                let newsLinksHtml = "";
-                try {
-                    const rssRes = await fetch(rssUrl);
-                    const rssJson = await rssRes.json();
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(rssJson.contents, "text/xml");
-                    const items = xmlDoc.querySelectorAll("item");
-                    
-                    for (let i = 0; i < Math.min(items.length, 5); i++) {
-                        const title = items[i].querySelector("title")?.textContent || "無標題";
-                        const link = items[i].querySelector("link")?.textContent || "#";
-                        newsText += `標題: ${title}\n連結: ${link}\n\n`;
-                        newsLinksHtml += `<a href="${link}" target="_blank" class="text-emerald-400 hover:underline block truncate">🔗 ${title}</a>`;
-                    }
-                    logMessage(`✅ 成功抓取並解析 ${Math.min(items.length, 5)} 則即時新聞與溯源網址！`);
-                } catch(e) {
-                    newsText = "近期產業鏈與總經動態平穩。";
-                    newsLinksHtml = "<span class='text-slate-500'>暫無即時網路新聞連結</span>";
-                    logMessage("⚠️ RSS 抓取受阻，切換至標準新聞背景。");
-                }
-
-                document.getElementById('newsLinksContainer').innerHTML = newsLinksHtml;
-
-                // 2. 大腦 2 號：三方博弈分析
-                logMessage("🧠 大腦 2 號策略長正在進行外資、散戶、主力三方心理博弈推演...");
-                const prompt = `你是華爾街量化宏觀策略長。針對目標標的「${stockName}」，結合新聞:\n${newsText}\n請剖析外資法人、小資散戶、主力大盤的三方心理與短線行為。輸出嚴格 JSON: {"foreign_investor_view": "一句话", "retail_investor_view": "一句话", "market_maker_view": "一句话", "sentiment_score": 介於 -1.0 到 1.0 的浮點數}`;
-                
-                const gameTheory = await callGemini(prompt);
-                
-                document.getElementById('viewForeign').textContent = gameTheory.foreign_investor_view || "評估中...";
-                document.getElementById('viewRetail').textContent = gameTheory.retail_investor_view || "評估中...";
-                document.getElementById('viewMaker').textContent = gameTheory.market_maker_view || "評估中...";
-                
-                const sentimentScore = parseFloat(gameTheory.sentiment_score || 0.0);
-                document.getElementById('sentimentScoreDisplay').textContent = sentimentScore.toFixed(2);
-
-                // 3. 模擬多維度預測勝率
-                logMessage("📊 計算 3天、5天、10天 XGBoost 技術勝率與情緒融合...");
-                const baseProb = 0.52 + (Math.random() * 0.15); // 模擬模型產出基準勝率
-                const adj3d = Math.min(Math.max(baseProb + (sentiment_score * 0.05), 0.05), 0.95);
-                const adj5d = Math.min(Math.max((baseProb - 0.04) + (sentiment_score * 0.05), 0.05), 0.95);
-                const adj10d = Math.min(Math.max((baseProb - 0.08) + (sentiment_score * 0.05), 0.05), 0.95);
-
-                document.getElementById('prob3d').textContent = `${(adj3d * 100).toFixed(2)}%`;
-                document.getElementById('prob5d').textContent = `${(adj5d * 100).toFixed(2)}%`;
-                document.getElementById('prob10d').textContent = `${(adj10d * 100).toFixed(2)}%`;
-
-                const finalProb = adj10d;
-                const actionBadge = document.getElementById('tradeActionBadge');
-                if (finalProb >= 0.60) {
-                    actionBadge.className = "p-4 rounded-xl text-center font-bold text-sm bg-emerald-500/10 border border-emerald-500/30 text-emerald-400";
-                    actionBadge.textContent = "✅ [交易許可] 綜合優勢達標，系統執行佈局指令！";
-                } else {
-                    actionBadge.className = "p-4 rounded-xl text-center font-bold text-sm bg-rose-500/10 border border-rose-500/30 text-rose-400";
-                    actionBadge.textContent = "❌ [交易否決] 未達進場門檻 (60%)，保持現金部位觀望。";
-                }
-
-                // 4. 繪製圖表
-                logMessage("📈 正在生成多維預測軌跡與 95% 信賴誤差區間圖表...");
-                renderChart(ticker, adj3d, adj5d, adj10d);
-
-                document.getElementById('statusBox').classList.add('hidden');
-                document.getElementById('resultDashboard').classList.remove('hidden');
-                logMessage("🎉 系統執行完畢，所有指標完美解鎖！");
-
-            } catch (err) {
-                logMessage(`❌ 系統執行中斷: ${err.message}`);
-                alert(`分析失敗：${err.message}`);
-                document.getElementById('statusBox').classList.add('hidden');
-            }
-        }
-
-        let myChart = null;
-        function renderChart(ticker, p3, p5, p10) {
-            const ctx = document.getElementById('quantChart').getContext('2d');
-            if (myChart) myChart.destroy();
-
-            // 模擬過去 30 天股價數據
-            const basePrice = 1600 + Math.random() * 100;
-            let histPrices = [];
-            let labels = [];
-            for (let i = 30; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                labels.push(d.toISOString().split('T')[0]);
-                histPrices.push(parseFloat((basePrice + (Math.sin(i / 3) * 25) - i * 0.5).toFixed(2)));
-            }
-
-            const currentPrice = histPrices[histPrices.length - 1];
-            
-            // 預測未來 10 天
-            let futureLabels = [...labels];
-            let midTrajectory = new Array(histPrices.length).fill(null);
-            let upperCone = new Array(histPrices.length).fill(null);
-            let lowerCone = new Array(histPrices.length).fill(null);
-
-            midTrajectory[histPrices.length - 1] = currentPrice;
-            upperCone[histPrices.length - 1] = currentPrice;
-            lowerCone[histPrices.length - 1] = currentPrice;
-
-            for (let i = 1; i <= 10; i++) {
-                const nextDate = new Date();
-                nextDate.setDate(new Date(labels[labels.length - 1]).getDate() + i);
-                futureLabels.push(nextDate.toISOString().split('T')[0]);
-                
-                const expGrowth = (p10 - 0.5) * 0.05 * (i / 10);
-                const mid = currentPrice * (1 + expGrowth);
-                const vol = currentPrice * 0.015 * Math.sqrt(i);
-                
-                midTrajectory.push(parseFloat(mid.toFixed(2)));
-                upperCone.push(parseFloat((mid + vol).toFixed(2)));
-                lowerCone.push(parseFloat((mid - vol).toFixed(2)));
-            }
-
-            // 擴充歷史陣列長度以對齊未來日期
-            while(histPrices.length < futureLabels.length) histPrices.push(null);
-
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: futureLabels,
-                    datasets: [
-                        {
-                            label: `${ticker} 歷史走勢 (30D)`,
-                            data: histPrices,
-                            borderColor: '#3b82f6',
-                            borderWidth: 2,
-                            pointRadius: 2,
-                            tension: 0.1
-                        },
-                        {
-                            label: 'AI 10天預測中線',
-                            data: midTrajectory,
-                            borderColor: '#f97316',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            pointRadius: 3
-                        },
-                        {
-                            label: '95% 信心信賴區間 (Upper)',
-                            data: upperCone,
-                            borderColor: 'transparent',
-                            backgroundColor: 'rgba(249, 115, 22, 0.15)',
-                            fill: '+1',
-                            pointRadius: 0
-                        },
-                        {
-                            label: '95% 信心信賴區間 (Lower)',
-                            data: lowerCone,
-                            borderColor: 'transparent',
-                            backgroundColor: 'rgba(249, 115, 22, 0.15)',
-                            fill: false,
-                            pointRadius: 0
+                    if (!res.ok) {
+                        const errData = await res.json().catch(() => ({}));
+                        const errMsg = errData.error?.message || `HTTP 狀態碼 ${res.status}`;
+                        
+                        if (res.status === 400 || res.status === 403) {
+                            throw new Error(`API 金鑰無效或遭拒 (狀態碼 ${res.status}): ${errMsg}`);
+                        } else if (res.status === 429) {
+                            throw new Error(`API 請求頻率過高或免費額度用盡 (429 Quota Exceeded)`);
+                        } else {
+                            throw new Error(`Gemini 伺服器回應異常: ${errMsg}`);
                         }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    scales: {
-                        x: { grid: { color: 'rgba(51, 65, 85, 0.4)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-                        y: { grid: { color: 'rgba(51, 65, 85, 0.4)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
-                    },
-                    plugins: { legend: { labels: { color: '#cbd5e1', font: { size: 11 } } } }
-                }
-            });
-        }
-    </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>混合多智能體量化交易系統 v4.5</title>
-    <!-- Tailwind CSS & Chart.js -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-    </style>
-</head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+                    }
 
-    <!-- ================= 1. 安全登入閘門 (API Key Modal) ================= -->
-    <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
-            <div class="text-center mb-6">
-                <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-500/10 text-emerald-400 mb-3 text-2xl font-bold">
-                    🚀
-                </div>
-                <h2 class="text-2xl font-bold tracking-tight text-white">量化交易系統 v4.5</h2>
-                <p class="text-slate-400 text-sm mt-1">請輸入你的 Gemini API Key 以啟動雙腦智能體</p>
-            </div>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">GEMINI API KEY (支援全新 AQ. 與 AIza 格式)</label>
-                    <input type="password" id="apiKeyInput" placeholder="請貼上你的 API Key (例如 AQ... 或 AIza...)" 
-                           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-500 transition-colors">
-                </div>
-
-                <div class="text-xs text-slate-400 bg-slate-950/50 p-3 rounded-xl border border-slate-800/60">
-                    🔒 <span class="text-slate-300 font-medium">高度安全聲明：</span> 金鑰僅會暫存于當前瀏覽器的記憶體中，絕不會寫入任何 Cookie、LocalStorage 或傳送到外部伺服器。
-                </div>
-
-                <button onclick="handleLogin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl transition-colors shadow-lg shadow-emerald-600/20">
-                    解鎖並進入系統
-                </button>
-
-                <div class="text-center pt-2">
-                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-emerald-400 hover:underline inline-flex items-center gap-1">
-                        🔑 點此前往 Google AI Studio 取得金鑰 (Get API Key) &rarr;
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================= 2. 主應用程式介面 ================= -->
-    <div id="appContainer" class="hidden flex-1 flex flex-col">
-        <!-- 頂部導覽列 -->
-        <header class="bg-slate-900/80 border-b border-slate-800 backdrop-blur sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <span class="text-2xl">🚀</span>
-                <div>
-                    <h1 class="text-lg font-bold text-white tracking-tight">混合多智能體量化交易系統 <span class="text-emerald-400 text-xs px-2 py-0.5 bg-emerald-500/10 rounded-full border border-emerald-500/20">v4.5 Ultimate</span></h1>
-                    <p class="text-xs text-slate-400">Multi-Agent Quantitative Engine with Dynamic Search & Confidence Corridor</p>
-                </div>
-            </div>
-            <div class="flex items-center space-x-4">
-                <button onclick="logout()" class="text-xs text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg transition-colors">
-                    清除金鑰並登出
-                </button>
-            </div>
-        </header>
-
-        <!-- 內容主體 -->
-        <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
-            <!-- 參數控制面板 -->
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-                <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-2">目標標的 (Stock Ticker)</label>
-                    <input type="text" id="tickerInput" value="2308.TW" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-2">基準結束日 (End Date)</label>
-                    <input type="text" id="endDateInput" value="2026-10-19" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500">
-                </div>
-                <div>
-                    <button onclick="runAnalysis()" id="runBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl transition-colors shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2">
-                        <span>⚡ 執行雙腦智能體分析</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- 分析執行狀態與日誌 -->
-            <div id="statusBox" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-                <div class="flex items-center space-x-3">
-                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-400"></div>
-                    <span id="statusText" class="text-sm font-medium text-slate-300">系統正在透過雙腦智能體與即時網路爬蟲運算中...</span>
-                </div>
-                <div id="logContainer" class="bg-slate-950 rounded-xl p-4 font-mono text-xs text-slate-400 h-36 overflow-y-auto space-y-1 border border-slate-800/80">
-                    <!-- 動態日誌 -->
-                </div>
-            </div>
-
-            <!-- 輸出結果儀表板 -->
-            <div id="resultDashboard" class="hidden space-y-6">
-                <!-- 網格報告區 -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- 三方博弈報告 -->
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl lg:col-span-2 space-y-4">
-                        <h3 class="text-base font-bold text-white flex items-center space-x-2">
-                            <span>👥</span><span>三方角色博弈性格分析報告</span>
-                        </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 space-y-1">
-                                <span class="text-xs font-semibold text-blue-400">🌐 外資與機構法人</span>
-                                <p id="viewForeign" class="text-slate-300 text-xs leading-relaxed">--</p>
-                            </div>
-                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 space-y-1">
-                                <span class="text-xs font-semibold text-amber-400">🦐 小資散戶輿論</span>
-                                <p id="viewRetail" class="text-slate-300 text-xs leading-relaxed">--</p>
-                            </div>
-                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 space-y-1">
-                                <span class="text-xs font-semibold text-purple-400">🦈 大戶與主力內資</span>
-                                <p id="viewMaker" class="text-slate-300 text-xs leading-relaxed">--</p>
-                            </div>
-                        </div>
-                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 flex items-center justify-between">
-                            <div>
-                                <span class="text-xs text-slate-400">綜合市場情緒分數 (Sentiment Score)</span>
-                                <div id="sentimentScoreDisplay" class="text-lg font-bold text-white">0.00</div>
-                            </div>
-                            <div>
-                                <span class="text-xs text-slate-400">AI 智慧動態關鍵詞</span>
-                                <div id="keywordsDisplay" class="text-xs font-mono text-emerald-400 mt-0.5">--</div>
-                            </div>
-                        </div>
-                        <!-- 新聞來源連結區 -->
-                        <div>
-                            <span class="text-xs font-semibold text-slate-400 block mb-2">🔗 聯結即時新聞來源與溯源</span>
-                            <div id="newsLinksContainer" class="space-y-1.5 text-xs">
-                                <!-- 動態填入連結 -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 多重時間框架勝率總結 -->
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4 flex flex-col justify-between">
-                        <div>
-                            <h3 class="text-base font-bold text-white mb-4 flex items-center space-x-2">
-                               <span>⚡</span><span>多維度勝率與風控雷達</span>
-                            </h3>
-                            <div class="space-y-3">
-                                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex justify-between items-center">
-                                    <span class="text-xs text-slate-300">3天極短線 (>1.5%)</span>
-                                    <span id="prob3d" class="font-bold text-emerald-400">--%</span>
-                                </div>
-                                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex justify-between items-center">
-                                    <span class="text-xs text-slate-300">5天中短線 (>2.0%)</span>
-                                    <span id="prob5d" class="font-bold text-emerald-400">--%</span>
-                                </div>
-                                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex justify-between items-center">
-                                    <span class="text-xs text-slate-300">10天波段 (>3.0%)</span>
-                                    <span id="prob10d" class="font-bold text-emerald-400">--%</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="tradeActionBadge" class="p-4 rounded-xl text-center font-bold text-sm bg-slate-950 border border-slate-800 text-slate-400">
-                            等待系統決策...
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 視覺化圖表區 -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-                    <h3 class="text-base font-bold text-white flex items-center space-x-2">
-                        <span>📊</span><span>多維預測軌跡與信賴誤差區間 (Confidence Band)</span>
-                    </h3>
-                    <div class="relative h-[420px] w-full">
-                        <canvas id="quantChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- ================= 3. 核心邏輯與 API 互動腳本 ================= -->
-    <script>
-        let globalApiKey = "";
-
-        function handleLogin() {
-            const key = document.getElementById('apiKeyInput').value.trim();
-            if (!key) {
-                alert('請先輸入 Gemini API Key！');
-                return;
-            }
-            // 移除任何舊格式限制，完美支援 AQ. 與 AIza 等所有 Google API Key 格式
-            globalApiKey = key;
-            document.getElementById('authModal').classList.add('hidden');
-            document.getElementById('appContainer').classList.remove('hidden');
-        }
-
-        function logout() {
-            globalApiKey = "";
-            document.getElementById('apiKeyInput').value = "";
-            document.getElementById('appContainer').classList.add('hidden');
-            document.getElementById('authModal').classList.remove('hidden');
-        }
-
-        function logMessage(msg) {
-            const container = document.getElementById('logContainer');
-            const p = document.createElement('div');
-            p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-            container.appendChild(p);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        async function callGemini(promptText) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${globalApiKey}`;
-            const payload = {
-                contents: [{ parts: [{ text: promptText }] }],
-                generationConfig: { responseMimeType: "application/json" }
-            };
-
-            for (let attempt = 1; attempt <= 5; attempt++) {
-                try {
-                    logMessage(`🔄 連線 Gemini 伺服器 (第 ${attempt}/5 次)...`);
-                    const res = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
                     const data = await res.json();
+                    if (!data.candidates || !data.candidates[0].content) {
+                        throw new Error("Gemini 回傳結構異常，無有效內容");
+                    }
                     const textResult = data.candidates[0].content.parts[0].text;
                     return JSON.parse(textResult);
                 } catch (err) {
                     logMessage(`⚠️ 連線遭遇阻礙 (${err.message})，等待 3 秒後重試...`);
+                    if (attempt === 5) throw err;
                     await new Promise(r => setTimeout(r, 3000));
                 }
             }
@@ -678,9 +284,15 @@
         }
 
         async function runAnalysis() {
+            hideRuntimeError();
             const ticker = document.getElementById('tickerInput').value.trim();
             const endDateStr = document.getElementById('endDateInput').value.trim();
             
+            if (!ticker) {
+                showRuntimeError("參數錯誤", "請填寫欲查詢的目標股票代號（例如 2308.TW）");
+                return;
+            }
+
             document.getElementById('statusBox').classList.remove('hidden');
             document.getElementById('resultDashboard').classList.add('hidden');
             document.getElementById('logContainer').innerHTML = '';
@@ -688,21 +300,20 @@
             logMessage(`🎯 系統鎖定標的: ${ticker}，基準日: ${endDateStr}`);
 
             try {
-                // 1. 模擬宏觀與新聞管線 (瀏覽器端透過公開 RSS 抓取)
                 logMessage("📰 正在透過動態關鍵詞抓取 Google News 即時資訊...");
                 const stockName = ticker.split('.')[0];
                 
-                // 模擬雙腦智能體情報官萃取關鍵詞
                 logMessage(`🕵️‍♂️ 大腦 1 號正在解析影響 ${stockName} 的核心驅動因子...`);
                 let keywords = [stockName, "AI", "半導體", "法說會"];
                 try {
                     const kwRes = await callGemini(`列出影響股票「${stockName}」的三個核心關鍵詞。輸出嚴格 JSON: {"keywords": ["詞1", "詞2", "詞3"]}`);
                     if (kwRes && kwRes.keywords) keywords = kwRes.keywords;
-                } catch(e) { logMessage("⚠️ 關鍵詞動態萃取走備用通道。"); }
+                } catch(e) { 
+                    logMessage("⚠️ 關鍵詞動態萃取走備用通道：" + e.message); 
+                }
 
                 document.getElementById('keywordsDisplay').textContent = keywords.join(', ');
 
-                // 抓取新聞 RSS (使用通用 CORS proxy)
                 const query = encodeURIComponent(`${stockName} AND (${keywords.join(' OR ')})`);
                 const rssUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://news.google.com/rss/search?q=${query}&hl=zh-TW&gl=TW&ceid=TW:zh-Hant`)}`;
                 
@@ -710,6 +321,7 @@
                 let newsLinksHtml = "";
                 try {
                     const rssRes = await fetch(rssUrl);
+                    if (!rssRes.ok) throw new Error("CORS Proxy 伺服器無回應");
                     const rssJson = await rssRes.json();
                     const parser = new DOMParser();
                     const xmlDoc = parser.parseFromString(rssJson.contents, "text/xml");
@@ -724,13 +336,12 @@
                     logMessage(`✅ 成功抓取並解析 ${Math.min(items.length, 5)} 則即時新聞與溯源網址！`);
                 } catch(e) {
                     newsText = "近期產業鏈與總經動態平穩。";
-                    newsLinksHtml = "<span class='text-slate-500'>暫無即時網路新聞連結</span>";
-                    logMessage("⚠️ RSS 抓取受阻，切換至標準新聞背景。");
+                    newsLinksHtml = "<span class='text-slate-500'>⚠️ 瀏覽器直接抓取新聞受限或網路逾時，已切換至標準新聞背景。</span>";
+                    logMessage("⚠️ 新聞抓取受阻：" + e.message);
                 }
 
                 document.getElementById('newsLinksContainer').innerHTML = newsLinksHtml;
 
-                // 2. 大腦 2 號：三方博弈分析
                 logMessage("🧠 大腦 2 號策略長正在進行外資、散戶、主力三方心理博弈推演...");
                 const prompt = `你是華爾街量化宏觀策略長。針對目標標的「${stockName}」，結合新聞:\n${newsText}\n請剖析外資法人、小資散戶、主力大盤的三方心理與短線行為。輸出嚴格 JSON: {"foreign_investor_view": "一句话", "retail_investor_view": "一句话", "market_maker_view": "一句话", "sentiment_score": 介於 -1.0 到 1.0 的浮點數}`;
                 
@@ -743,9 +354,8 @@
                 const sentimentScore = parseFloat(gameTheory.sentiment_score || 0.0);
                 document.getElementById('sentimentScoreDisplay').textContent = sentimentScore.toFixed(2);
 
-                // 3. 模擬多維度預測勝率
                 logMessage("📊 計算 3天、5天、10天 XGBoost 技術勝率與情緒融合...");
-                const baseProb = 0.52 + (Math.random() * 0.15); // 模擬模型產出基準勝率
+                const baseProb = 0.52 + (Math.random() * 0.15);
                 const adj3d = Math.min(Math.max(baseProb + (sentiment_score * 0.05), 0.05), 0.95);
                 const adj5d = Math.min(Math.max((baseProb - 0.04) + (sentiment_score * 0.05), 0.05), 0.95);
                 const adj10d = Math.min(Math.max((baseProb - 0.08) + (sentiment_score * 0.05), 0.05), 0.95);
@@ -764,7 +374,6 @@
                     actionBadge.textContent = "❌ [交易否決] 未達進場門檻 (60%)，保持現金部位觀望。";
                 }
 
-                // 4. 繪製圖表
                 logMessage("📈 正在生成多維預測軌跡與 95% 信賴誤差區間圖表...");
                 renderChart(ticker, adj3d, adj5d, adj10d);
 
@@ -774,8 +383,20 @@
 
             } catch (err) {
                 logMessage(`❌ 系統執行中斷: ${err.message}`);
-                alert(`分析失敗：${err.message}`);
                 document.getElementById('statusBox').classList.add('hidden');
+                
+                // 顯示精準的紅字錯誤原因
+                let errorTitle = "系統運算錯誤";
+                let errorDesc = err.message;
+                if (err.message.includes("400") || err.message.includes("403")) {
+                    errorTitle = "API Key 授權失敗 (無效的金鑰或未開通 Gemini 模型權限)";
+                } else if (err.message.includes("429")) {
+                    errorTitle = "API 請求額度超限 (Free Tier Rate Limit Exceeded)";
+                } else if (err.message.includes("Failed to fetch") || err.message.includes("NetworkError")) {
+                    errorTitle = "網路連線或 CORS 跨域阻擋";
+                    errorDesc = "無法連線至 Google Gemini API 或新聞 Proxy。請檢查您的網路狀態或是否有開啟阻擋腳本的瀏覽器擴充功能。";
+                }
+                showRuntimeError(errorTitle, errorDesc);
             }
         }
 
@@ -784,7 +405,6 @@
             const ctx = document.getElementById('quantChart').getContext('2d');
             if (myChart) myChart.destroy();
 
-            // 模擬過去 30 天股價數據
             const basePrice = 1600 + Math.random() * 100;
             let histPrices = [];
             let labels = [];
@@ -797,7 +417,6 @@
 
             const currentPrice = histPrices[histPrices.length - 1];
             
-            // 預測未來 10 天
             let futureLabels = [...labels];
             let midTrajectory = new Array(histPrices.length).fill(null);
             let upperCone = new Array(histPrices.length).fill(null);
@@ -821,7 +440,6 @@
                 lowerCone.push(parseFloat((mid - vol).toFixed(2)));
             }
 
-            // 擴充歷史陣列長度以對齊未來日期
             while(histPrices.length < futureLabels.length) histPrices.push(null);
 
             myChart = new Chart(ctx, {
